@@ -306,5 +306,118 @@ function register_last_testimoni_widget() {
 }
 add_action( 'widgets_init', 'register_last_testimoni_widget' );
 
+
+/**
+ * Adds Custom showing testimonial widget.
+ */
+class custom_testimonial extends WP_Widget {
+
+    /**
+     * Register widget with WordPress.
+     */
+    function __construct() {
+        parent::__construct(
+            'custom_testimonial', // Base ID
+            __( 'Custom testimonial', 'text_domain' ), // Name
+            array( 'description' => __( 'Configure your testimonial to show on front ', 'text_domain' ), ) // Args
+        );
+    }
+
+    /**
+     * Front-end display of widget.
+     *
+     * @see WP_Widget::widget()
+     *
+     * @param array $args     Widget arguments.
+     * @param array $instance Saved values from database.
+     */
+    public function widget( $args, $instance ) {
+        echo $args['before_widget'];
+        if ( ! empty( $instance['title'] ) ) {
+            echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
+        }
+        
+        if ( !empty( $instance['type_testimoni'] )) {
+            $type_testimoni = $instance['type_testimoni'];
+            if ($type_testimoni==1) {
+                $order = 'rand()';
+            }else{
+                $order = 'id_testimonial desc';
+            }
+        }
+
+        global $wpdb;
+        // $data = $wpdb->get_row("SELECT * FROM testimonial order by rand",ARRAY_A);
+        $limit = $instance['total_testimoni'];
+        $data = $wpdb->get_results( "SELECT * FROM testimonial order by $order limit 0,$limit");
+        // print_r($data);
+        foreach ($data as $row) {
+            echo "<h4>".$row->testimonial."</h4>";
+            echo "<i>-".$row->name."</i>";
+        }
+        //
+        // echo __( esc_attr( 'Hello, World!' ), 'text_domain' );
+        // echo $args['after_widget'];
+    }
+
+    /**
+     * Back-end widget form.
+     *
+     * @see WP_Widget::form()
+     *
+     * @param array $instance Previously saved values from database.
+     */
+    public function form( $instance ) {
+        $title = ! empty( $instance['title'] ) ? $instance['title'] : __( 'New title', 'text_domain' );
+        $total_testimoni = ! empty( $instance['total_testimoni'] ) ? $instance['total_testimoni'] : __( 'Total Testimoni', 'text_domain' );
+       
+        ?>
+
+        <p>
+        <label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php _e( esc_attr( 'Title:' ) ); ?></label> 
+        <input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
+
+        <label for="<?php echo esc_attr( $this->get_field_id( 'total_testimoni' ) ); ?>"><?php _e( esc_attr( 'Total Testimoni:' ) ); ?></label> 
+        <input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'total_testimoni' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'total_testimoni' ) ); ?>" type="text" value="<?php echo esc_attr( $total_testimoni ); ?>">
+
+        <label for="<?php echo esc_attr( $this->get_field_id( 'type_testimoni' ) ); ?>"><?php _e( esc_attr( 'Type Testimoni:' ) ); ?></label> 
+        <select class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'type_testimoni' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'type_testimoni' ) ); ?>">
+            <option value="1" <?php if($instance['type_testimoni']==1){echo "selected";} ?> >Random</option>
+            <option value="2" <?php if($instance['type_testimoni']==2){echo "selected";} ?>>Newest testimonial</option>
+        </select>
+
+        </p>
+        <?php 
+    }
+
+    /**
+     * Sanitize widget form values as they are saved.
+     *
+     * @see WP_Widget::update()
+     *
+     * @param array $new_instance Values just sent to be saved.
+     * @param array $old_instance Previously saved values from database.
+     *
+     * @return array Updated safe values to be saved.
+     */
+    public function update( $new_instance, $old_instance ) {
+        $instance = array();
+        $instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
+        $instance['total_testimoni'] = ( ! empty( $new_instance['total_testimoni'] ) ) ? strip_tags( $new_instance['total_testimoni'] ) : '';
+        $instance['type_testimoni'] = ( ! empty( $new_instance['type_testimoni'] ) ) ? strip_tags( $new_instance['type_testimoni'] ) : '';
+
+
+        return $instance;
+    }
+
+} // class Foo_Widget
+
+
+// register Custom Testimonial
+function register_custom_testimonial() {
+    register_widget( 'custom_testimonial' );
+}
+add_action( 'widgets_init', 'register_custom_testimonial' );
+
 ?>
 
