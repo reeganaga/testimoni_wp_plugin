@@ -218,6 +218,8 @@ class Foo_Widget extends WP_Widget {
 // register Foo_Widget widget
 function register_foo_widget() {
     register_widget( 'Foo_Widget' );
+    register_widget( 'last_testimoni_widget' );
+    register_widget( 'custom_testimonial' );
 }
 add_action( 'widgets_init', 'register_foo_widget' );
 
@@ -299,12 +301,6 @@ class last_testimoni_widget extends WP_Widget {
 
 } // class Foo_Widget
 
-
-// register Foo_Widget widget
-function register_last_testimoni_widget() {
-    register_widget( 'last_testimoni_widget' );
-}
-add_action( 'widgets_init', 'register_last_testimoni_widget' );
 
 
 /**
@@ -412,12 +408,6 @@ class custom_testimonial extends WP_Widget {
 
 } // class Foo_Widget
 
-
-// register Custom Testimonial
-function register_custom_testimonial() {
-    register_widget( 'custom_testimonial' );
-}
-add_action( 'widgets_init', 'register_custom_testimonial' );
 
 ?>
 
