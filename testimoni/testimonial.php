@@ -47,17 +47,17 @@ function deliver_mail() {
         $testimoni = esc_textarea( $_POST["cf-testimoni"] );
 
         $data = array(
-        	'name'=>$name,
-        	'email'=>$email,
-        	'phone_number'=>$phone_number,
-        	'testimonial'=>$testimoni
-        	);
+            'name'=>$name,
+            'email'=>$email,
+            'phone_number'=>$phone_number,
+            'testimonial'=>$testimoni
+            );
         //save to database
         global $wpdb;
         if ($wpdb->insert('testimonial',$data,'')) {
-        	echo "Your data has been recorded, thanks for participate";
+            echo "Your data has been recorded, thanks for participate";
         }else{
-        	echo "i'm sorry, there is problem to save data";
+            echo "i'm sorry, there is problem to save data";
         }
 
     }
@@ -96,43 +96,43 @@ add_shortcode( 'testimonial', 'cf_shortcode' );
 add_action( 'admin_menu', 'my_admin_menu' );
 
 function my_admin_menu() {
-	add_menu_page( 'Testimonial page', 'Testimonial', 'manage_options', 'testimoni/testimonial.php', 'myplguin_admin_page', 'dashicons-format-aside', 6  );
+    add_menu_page( 'Testimonial page', 'Testimonial', 'manage_options', 'testimoni/testimonial.php', 'myplguin_admin_page', 'dashicons-format-aside', 6  );
 }
 
 function myplguin_admin_page(){
 
-	global $wpdb;
+    global $wpdb;
 
-	$data=$wpdb->get_results('SELECT * FROM testimonial'); 
-	?>
-	<div class="wrap">
-		<h2>Here is Your Tesmonial</h2>
-			<table class="wp-list-table widefat fixed striped pages">
-				<thead>
-					<tr>
-						<th>id</th>
-						<th>Name</th>
-						<th>Email</th>
-						<th>Phone Number</th>
+    $data=$wpdb->get_results('SELECT * FROM testimonial'); 
+    ?>
+    <div class="wrap">
+        <h2>Here is Your Tesmonial</h2>
+            <table class="wp-list-table widefat fixed striped pages">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
                         <th>Testimonial</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody>
-				<?php foreach ($data as $row): ?>
-					<tr>
-						<td><?php echo $row->id_testimonial; ?></td>
-						<td><?php echo $row->name; ?></td>
-						<td><?php echo $row->email; ?></td>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($data as $row): ?>
+                    <tr>
+                        <td><?php echo $row->id_testimonial; ?></td>
+                        <td><?php echo $row->name; ?></td>
+                        <td><?php echo $row->email; ?></td>
                         <td><?php echo $row->phone_number; ?></td>
                         <td><?php echo $row->testimonial; ?></td>
-						<td><a class="button" onclick="return confirm('Are you sure to delete this testimonial?');" href="<?php echo admin_url('admin.php?page=testimoni/testimonial.php&id_testimonial='.$row->id_testimonial . '&action=delete_testimonial'); ?>">delete</a></td>
-					</tr>
-				<?php endforeach ?>
-				</tbody>
-			</table>
-	</div>
-	<?php
+                        <td><a class="button" onclick="return confirm('Are you sure to delete this testimonial?');" href="<?php echo admin_url('admin.php?page=testimoni/testimonial.php&id_testimonial='.$row->id_testimonial . '&action=delete_testimonial'); ?>">delete</a></td>
+                    </tr>
+                <?php endforeach ?>
+                </tbody>
+            </table>
+    </div>
+    <?php
 
 }
 
@@ -150,7 +150,7 @@ class Foo_Widget extends WP_Widget {
     function __construct() {
         parent::__construct(
             'foo_widget', // Base ID
-            __( 'Testimonial', 'text_domain' ), // Name
+            __( 'Random testimonial', 'text_domain' ), // Name
             array( 'description' => __( 'Showing random testimonial', 'text_domain' ), ) // Args
         );
     }
@@ -220,5 +220,91 @@ function register_foo_widget() {
     register_widget( 'Foo_Widget' );
 }
 add_action( 'widgets_init', 'register_foo_widget' );
+
+/**
+ * Adds Testimonialthreelast widget.
+ */
+class last_testimoni_widget extends WP_Widget {
+
+    /**
+     * Register widget with WordPress.
+     */
+    function __construct() {
+        parent::__construct(
+            'last_testimoni_widget', // Base ID
+            __( 'Testimonial three last', 'text_domain' ), // Name
+            array( 'description' => __( 'Showing three last testimonial ', 'text_domain' ), ) // Args
+        );
+    }
+
+    /**
+     * Front-end display of widget.
+     *
+     * @see WP_Widget::widget()
+     *
+     * @param array $args     Widget arguments.
+     * @param array $instance Saved values from database.
+     */
+    public function widget( $args, $instance ) {
+        echo $args['before_widget'];
+        if ( ! empty( $instance['title'] ) ) {
+            echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
+        }
+        global $wpdb;
+        // $data = $wpdb->get_row("SELECT * FROM testimonial order by rand",ARRAY_A);
+        $data = $wpdb->get_results( "SELECT * FROM testimonial order by id_testimonial desc limit 0,3");
+        // print_r($data);
+        foreach ($data as $row) {
+            echo "<h4>".$row->testimonial."</h4>";
+            echo "<i>-".$row->name."</i>";
+        }
+        //
+        // echo __( esc_attr( 'Hello, World!' ), 'text_domain' );
+        // echo $args['after_widget'];
+    }
+
+    /**
+     * Back-end widget form.
+     *
+     * @see WP_Widget::form()
+     *
+     * @param array $instance Previously saved values from database.
+     */
+    public function form( $instance ) {
+        $title = ! empty( $instance['title'] ) ? $instance['title'] : __( 'New title', 'text_domain' );
+        ?>
+        <p>
+        <label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php _e( esc_attr( 'Title:' ) ); ?></label> 
+        <input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
+        </p>
+        <?php 
+    }
+
+    /**
+     * Sanitize widget form values as they are saved.
+     *
+     * @see WP_Widget::update()
+     *
+     * @param array $new_instance Values just sent to be saved.
+     * @param array $old_instance Previously saved values from database.
+     *
+     * @return array Updated safe values to be saved.
+     */
+    public function update( $new_instance, $old_instance ) {
+        $instance = array();
+        $instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
+
+        return $instance;
+    }
+
+} // class Foo_Widget
+
+
+// register Foo_Widget widget
+function register_last_testimoni_widget() {
+    register_widget( 'last_testimoni_widget' );
+}
+add_action( 'widgets_init', 'register_last_testimoni_widget' );
+
 ?>
 
